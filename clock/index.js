@@ -36,26 +36,26 @@ function drawClock(ctx, date, config) {
 function drawClockFace(ctx, config) {
   const centerPoint = [config.size / 2, config.size / 2];
 
-  ctx.arc(centerPoint[0], centerPoint[1], config.size / 2, 0, 360);
+  ctx.arc(centerPoint[0], centerPoint[1], config.size / 2, 0, 2 * Math.PI);
   ctx.fillStyle = config.backgroundColor;
   ctx.fill();
 
   for (let i = 0; i < 60; i++) {
     const angle = (360 / 60) * i;
 
-    let notchLength = config.notchBasicLength;
-    let notchWidth = config.notchBasicWidth;
-    const notchIndent = 5;
+    let notchLength = (config.notchBasicLength / 110) * config.size;
+    let notchWidth = (config.notchBasicWidth / 102) * config.size;
+    const notchIndent = config.size / 30;
 
     if (i % 30 === 0) {
-      notchLength = config.notch30Length;
-      notchWidth = config.notch30Width;
+      notchLength = (config.notch30Length / 150) * config.size;
+      notchWidth = (config.notch30Width / 150) * config.size;
     } else if (i % 15 === 0) {
-      notchLength = config.notch15Length;
-      notchWidth = config.notch15Width;
+      notchLength = (config.notch15Length / 140) * config.size;
+      notchWidth = (config.notch15Width / 140) * config.size;
     } else if (i % 5 === 0) {
-      notchLength = config.notch5Length;
-      notchWidth = config.notch5Width;
+      notchLength = (config.notch5Length / 130) * config.size;
+      notchWidth = (config.notch5Width / 130) * config.size;
     }
 
     const startPoint = getPointByAngle(
@@ -88,33 +88,40 @@ function drawClockArrows(ctx, date, config) {
 
   const hoursArrowEndPoint = getPointByAngle(
     centerPoint,
-    config.size / 2 - 32,
+    (config.size / 2) * 0.65,
     hoursAngle
   );
 
   const minutesArrowEndPoint = getPointByAngle(
     centerPoint,
-    config.size / 2 - 24,
+    (config.size / 2) * 0.75,
     minutesAngle
   );
 
   const secondsArrowEndPoint = getPointByAngle(
     centerPoint,
-    config.size / 2 - 18,
+    (config.size / 2) * 0.87,
     secondsAngle
   );
 
   drawLine(ctx, centerPoint, hoursArrowEndPoint, {
+    width: config.size / 100,
     color: config.hoursArrowColor,
   });
 
   drawLine(ctx, centerPoint, minutesArrowEndPoint, {
+    width: config.size / 100,
     color: config.minutesArrowColor,
   });
 
   drawLine(ctx, centerPoint, secondsArrowEndPoint, {
+    width: config.size / 100,
     color: config.secondsArrowColor,
   });
+
+  ctx.arc(centerPoint[0], centerPoint[1], config.size * 0.015, 0, 2 * Math.PI);
+  ctx.fillStyle = config.secondsArrowColor;
+  ctx.fill();
 }
 
 function getPointByAngle(center, radius, angle) {
