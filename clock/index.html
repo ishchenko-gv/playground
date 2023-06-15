@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .canvas-wrap {
+        display: flex;
+        justify-content: center;
+        margin-top: 32px;
+        margin-bottom: 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="canvas-wrap">
+      <canvas id="canvas" width="200" height="200"></canvas>
+    </div>
+    <fieldset>
+      <legend>config</legend>
+      <p>
+        <label for="size">size</label>
+        <input
+          id="size"
+          data-config-field="size"
+          type="range"
+          min="100"
+          max="1000"
+          step="10"
+          value="200"
+        />
+      </p>
+      <fieldset>
+        <legend>theme</legend>
+        <p>
+          <label for="theme">theme</label>
+          <select name="theme" id="theme">
+            <option value="sunglow">sunglow</option>
+            <option value="jade">jade</option>
+          </select>
+        </p>
+        <p>
+          <label for="background-color">background</label>
+          <input
+            id="background-color"
+            data-config-field="backgroundColor"
+            type="color"
+          />
+        </p>
+
+        <p>
+          <label for="hours-arrow-color">hours arrow</label>
+          <input
+            id="hours-arrow-color"
+            data-config-field="hoursArrowColor"
+            type="color"
+          />
+        </p>
+        <p>
+          <label for="minutes-arrow-color">minutes arrow</label>
+          <input
+            id="minutes-arrow-color"
+            data-config-field="minutesArrowColor"
+            type="color"
+          />
+        </p>
+        <p>
+          <label for="seconds-arrow-color">seconds arrow</label>
+          <input
+            id="seconds-arrow-color"
+            data-config-field="secondsArrowColor"
+            type="color"
+          />
+        </p>
+        <fieldset>
+          <legend>notch</legend>
+          <p>
+            <label for="notch-color">color</label>
+            <input
+              id="notch-color"
+              data-config-field="notchColor"
+              type="color"
+            />
+          </p>
+          <p>
+            <label for="notch-basic-length">notch basic length</label>
+            <input id=notch-basic-length" data-config-field="notchBasicLength"
+            type="range" min="3" max="30" step="1" value="4">
+          </p>
+          <p>
+            <label for="notch-basic-width">notch basic width</label>
+            <input id=notch-basic-width" data-config-field="notchBasicWidth"
+            type="range" min="1" max="5" step="1" value="1">
+          </p>
+          <p>
+            <label for="notch-5-length">notch 5 length</label>
+            <input id=notch-5-length" data-config-field="notch5Length"
+            type="range" min="3" max="30" step="1" value="8">
+          </p>
+          <p>
+            <label for="notch-5-width">notch 5 width</label>
+            <input id=notch-5-width" data-config-field="notch5Width"
+            type="range" min="1" max="5" step="1" value="1">
+          </p>
+          <p>
+            <label for="notch-15-length">notch 15 length</label>
+            <input id=notch-15-length" data-config-field="notch15Length"
+            type="range" min="3" max="30" step="1" value="12">
+          </p>
+          <p>
+            <label for="notch-15-width">notch 15 width</label>
+            <input id=notch-15-width" data-config-field="notch15Width"
+            type="range" min="1" max="5" step="1" value="1">
+          </p>
+          <p>
+            <label for="notch-30-length">notch 30 length</label>
+            <input id=notch-30-length" data-config-field="notch30Length"
+            type="range" min="3" max="30" step="1" value="16">
+          </p>
+          <p>
+            <label for="notch-30-width">notch 30 width</label>
+            <input id=notch-30-width" data-config-field="notch30Width"
+            type="range" min="1" max="5" step="1" value="1">
+          </p>
+        </fieldset>
+      </fieldset>
+    </fieldset>
+    <script data-script="clock" src="./index.js"></script>
+    <script>
+      const configForm = document.getElementsByTagName("fieldset")[0];
+      const themeSelect = document.getElementById("theme");
+      const configInputs = configForm.getElementsByTagName("input");
+      const cnv = document.getElementsByTagName("canvas")[0];
+      let config = {};
+
+      setThemeToInputs(themeSelect.value);
+      patchConfigByInputs();
+
+      configForm.addEventListener("change", patchConfigByInputs);
+
+      document
+        .getElementById("theme")
+        .addEventListener("change", (e) => setThemeToInputs(e.target.value));
+
+      function patchConfigByInputs() {
+        for (let input of configInputs) {
+          config[input.getAttribute("data-config-field")] = input.value;
+        }
+
+        canvas.width = config.size;
+        canvas.height = config.size;
+
+        setScriptQuery();
+      }
+
+      function setScriptQuery() {
+        const query = Object.entries(config).reduce((acc, [k, v]) => {
+          return acc + k + "=" + v + "&";
+        }, "?");
+
+        const clockScript = document.querySelector('[data-script="clock"]');
+
+        clockScript.src = clockScript.src.split("?")[0] + query;
+      }
+
+      function setThemeToInputs(theme) {
+        for (let [k, v] of Object.entries(getTheme(theme))) {
+          document.querySelector(`[data-config-field="${k}"]`).value = v;
+        }
+
+        configForm.dispatchEvent(new Event("change"));
+      }
+
+      function getTheme(theme) {
+        switch (theme) {
+          case "sunglow":
+            return {
+              backgroundColor: "#1982C4",
+              notchColor: "#FFCA3A",
+              hoursArrowColor: "#FF595E",
+              minutesArrowColor: "#FFCA3A",
+              secondsArrowColor: "#FFCA3A",
+            };
+          case "jade":
+            return {
+              backgroundColor: "#DBD5B5",
+              notchColor: "#2B9EB3",
+              hoursArrowColor: "#F8333C",
+              minutesArrowColor: "#2B9EB3",
+              secondsArrowColor: "#FCAB10",
+            };
+        }
+      }
+    </script>
+  </body>
+</html>
