@@ -51,7 +51,13 @@ class Scene {
       ballPosition.right >= paddlePosition.left &&
       ballPosition.left <= paddlePosition.right
     ) {
-      ball.bounce(Ball.Side.BOTTOM);
+      const paddleCollisionPoint = ballPosition.x - paddlePosition.x;
+
+      const bounceCorrection =
+        ((100 / (this.paddle.getSize().width / 2)) * paddleCollisionPoint) /
+        100;
+
+      ball.bounce(Ball.Side.BOTTOM, bounceCorrection);
     }
   }
 
@@ -153,12 +159,12 @@ class Ball {
   isLaunched = false;
   radius = 6;
   speed = 5;
-  dx = this.speed;
+  dx = Math.sqrt(this.speed ** 2 / 2);
   /**
    * even if the ball has not been launched, it's already has a collision with the paddle,
    * so this value should be changed to negative one, when tha game starts
    */
-  dy = this.speed;
+  dy = Math.sqrt(this.speed ** 2 / 2);
 
   setPosition(x, y) {
     this.x = x;
@@ -183,13 +189,28 @@ class Ball {
     };
   }
 
-  bounce(side) {
+  bounce(side, bounceCorrection) {
     if ([Ball.Side.LEFT, Ball.Side.RIGHT].includes(side)) {
       this.dx = -this.dx;
     }
 
     if ([Ball.Side.TOP, Ball.Side.BOTTOM].includes(side)) {
-      this.dy = -this.dy;
+      if (bounceCorrection) {
+        const angleDegrees =
+          90 * (1 - Math.min(Math.abs(bounceCorrection), 0.8));
+
+        const angleRadians = (angleDegrees * Math.PI) / 180;
+        const dx = Math.cos(angleRadians) * this.speed;
+        const dy = Math.sin(angleRadians) * this.speed;
+        const sign = bounceCorrection > 0 ? 1 : -1;
+
+        this.dx = dx * sign;
+        this.dy = -dy;
+
+        this.speed += 0.3;
+      } else {
+        this.dy = -this.dy;
+      }
     }
   }
 
