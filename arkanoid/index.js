@@ -2,15 +2,12 @@ const canvas = document.getElementById("arkanoid");
 const ctx = canvas.getContext("2d");
 
 class Scene {
-  constructor(paddle, ball) {
-    this.paddle = paddle;
-    this.ball = ball;
-  }
+  constructor(paddle, ball, bricksMap) {}
 }
 
 class Paddle {
   width = 100;
-  height = 1;
+  height = 6;
   x = canvas.width / 2;
   y = canvas.height - 30;
 
@@ -38,13 +35,14 @@ class Paddle {
     const startPoint = [this.x - this.width / 2, canvas.height - 30];
     const endPoint = [this.x + this.width / 2, canvas.height - 30];
 
-    drawLine(ctx, startPoint, endPoint, { width: this.getSize().height });
+    drawLine(ctx, startPoint, endPoint, { width: this.height });
   }
 }
 
 class Ball {
-  constructor(paddle) {
+  constructor(paddle, bricksMap) {
     this.paddle = paddle;
+    this.bricksMap = bricksMap;
     this.x = this.paddle.getPosition().x;
     this.y =
       this.paddle.getPosition().y - this.paddle.getSize().height - this.radius;
@@ -59,13 +57,13 @@ class Ball {
 
   isLaunched = false;
   isLost = false;
-  radius = 5;
+  radius = 6;
   speed = 3;
   x = 0;
   y = 0;
   dx = this.speed;
   /**
-   * even if the ball has not been launched, it's already has a collision with the platform,
+   * even if the ball has not been launched, it's already has a collision with the paddle,
    * so this value should be changed to negative one, when tha game starts
    */
   dy = this.speed;
@@ -74,6 +72,8 @@ class Ball {
     this.x = x;
     this.y = y;
   }
+
+  bounce(side) {}
 
   launch() {
     this.isLaunched = true;
@@ -108,11 +108,41 @@ class Ball {
     }
   }
 
+  checkBrickCollision() {
+    for (let brick of this.bricksMap.getBricks()) {
+      if (
+        this.x + this.radius >= brick.x &&
+        this.x - this.radius <= brick.x + Brick.Size.width &&
+        this.y + this.radius >= brick.y &&
+        this.y - this.radius <= brick.y + Brick.Size.height
+      ) {
+        if (this.x + this.radius - this.dx <= brick.x) {
+          return [Ball.Side.RIGHT, brick];
+        }
+
+        if (this.x - this.radius - this.dx >= brick.x + Brick.Size.width) {
+          return [Ball.Side.LEFT, brick];
+        }
+
+        if (this.y + this.radius - this.dy <= brick.y) {
+          return [Ball.Side.BOTTOM, brick];
+        }
+
+        if (this.y - this.radius - this.dy >= brick.y + Brick.Size.height) {
+          return [Ball.Side.TOP, brick];
+        }
+      }
+    }
+  }
+
   checkCollision() {
     const wallCollision = this.checkWallCollision();
     const paddleCollision = this.checkPaddleCollision();
+    const brickCollision = this.checkBrickCollision();
 
-    return wallCollision || paddleCollision;
+    if (brickCollision?.[1]) this.bricksMap.removeBrick(brickCollision[1]);
+
+    return wallCollision || paddleCollision || brickCollision?.[0];
   }
 
   checkIfLost() {
@@ -124,7 +154,6 @@ class Ball {
       this.y + this.radius >
         this.paddle.getPosition().y - this.paddle.getSize().height
     ) {
-      console.log("is lost");
       return true;
     }
 
@@ -159,8 +188,73 @@ class Ball {
   }
 }
 
+class Brick {
+  constructor(x, y, color) {
+    this.x = x;
+    this.y = y;
+    this.color = color;
+  }
+
+  static Size = {
+    width: 50,
+    height: 20,
+  };
+}
+
+const level1Map = [
+  [
+    { offset: 0 },
+    { color: "red" },
+    { color: "green" },
+    { color: "red" },
+    { color: "green" },
+    { color: "red" },
+  ],
+];
+
+class BricksMap {
+  constructor(map) {
+    this.bricks = [];
+
+    for (let row of map) {
+      let rowOpts = row.shift();
+      const startPointX = 50;
+      const startPointY = 50;
+
+      for (let i = 0; i < row.length; i++) {
+        this.bricks.push(
+          new Brick(
+            rowOpts.offset + startPointX + Brick.Size.width * i,
+            startPointY + Brick.Size.height,
+            row[i].color
+          )
+        );
+      }
+    }
+  }
+
+  getBricks() {
+    return this.bricks;
+  }
+
+  removeBrick(brick) {
+    this.bricks = this.bricks.filter((item) => item !== brick);
+  }
+
+  draw(ctx) {
+    for (let brick of this.bricks) {
+      ctx.beginPath();
+      ctx.fillStyle = brick.color;
+      ctx.rect(brick.x, brick.y, Brick.Size.width, Brick.Size.height);
+      ctx.fill();
+      ctx.stroke();
+    }
+  }
+}
+
 const paddle = new Paddle();
-const ball = new Ball(paddle);
+const bricksMap = new BricksMap(level1Map);
+const ball = new Ball(paddle, bricksMap);
 
 canvas.addEventListener("mousemove", (e) => {
   paddle.moveTo(e.offsetX);
@@ -174,6 +268,7 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   paddle.draw(ctx);
   ball.draw(ctx);
+  bricksMap.draw(ctx);
 
   requestAnimationFrame(draw);
 }
@@ -197,6 +292,8 @@ function drawLine(
 }
 
 function drawCircle(ctx, centerPoint, radius) {
+  ctx.beginPath();
   ctx.arc(centerPoint[0], centerPoint[1], radius, 0, 2 * Math.PI);
+  ctx.fillStyle = "black";
   ctx.fill();
 }
