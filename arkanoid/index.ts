@@ -143,15 +143,15 @@ class Paddle {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    const startPoint = [this.getPosition().left, this.getPosition().y];
-    const endPoint = [this.getPosition().right, this.getPosition().y];
+    const startPoint = [this.getPosition().left, this.getPosition().y] as Point;
+    const endPoint = [this.getPosition().right, this.getPosition().y] as Point;
 
     drawLine(ctx, startPoint, endPoint, { width: this.height });
   }
 }
 
 class Ball {
-  constructor(paddlePosition, paddleSize) {
+  constructor(paddlePosition: { x: number, y: number }, paddleSize: { width: number, height: number }) {
     this.x = paddlePosition.x;
     this.y = paddlePosition.y - this.radius - paddleSize.height;
   }
@@ -179,7 +179,7 @@ class Ball {
     };
   }
 
-  updatePosition(paddleCenterX) {
+  updatePosition(paddleCenterX: number) {
     if (this.isLaunched) {
       this.x = this.x + this.dx;
       this.y = this.y + this.dy;
@@ -234,7 +234,7 @@ class Ball {
     this.isLaunched = true;
   }
 
-  draw(ctx) {
+  draw(ctx: CanvasRenderingContext2D) {
     drawCircle(ctx, [this.x, this.y], this.radius);
   }
 }
@@ -246,7 +246,7 @@ namespace Ball {
 }
 
 class Brick {
-  constructor(x, y, color) {
+  constructor(x: number, y: number, color: string) {
     this.x = x;
     this.y = y;
     this.color = color;
@@ -276,19 +276,21 @@ const level1Map = [
   ],
 ];
 
+type LevelMap = { offset?: number, color?: string}[][];
+
 class BricksMap {
-  constructor(map) {
+  constructor(map: LevelMap) {
     for (let row of map) {
-      let rowOpts = row.shift();
+      let rowOpts = row.shift() || { offset: 0 };
       const startPointX = 50;
       const startPointY = 50;
 
       for (let i = 0; i < row.length; i++) {
         this.bricks.push(
           new Brick(
-            rowOpts.offset + startPointX + Brick.Size.width * i,
+            rowOpts.offset || 0 + startPointX + Brick.Size.width * i,
             startPointY + Brick.Size.height,
-            row[i].color
+            row[i].color || 'black'
           )
         );
       }
@@ -301,11 +303,11 @@ class BricksMap {
     return this.bricks;
   }
 
-  removeBrick(brick) {
+  removeBrick(brick: Brick) {
     this.bricks = this.bricks.filter((item) => item !== brick);
   }
 
-  draw(ctx) {
+  draw(ctx: CanvasRenderingContext2D) {
     for (let brick of this.bricks) {
       ctx.beginPath();
       ctx.fillStyle = brick.color;
@@ -317,7 +319,7 @@ class BricksMap {
 }
 
 class MathUtil {
-  static getDeltaByAngle(angle, speed) {
+  static getDeltaByAngle(angle: number, speed: number) {
     return {
       dx: Math.sin((Math.PI * angle) / 180) * speed,
       dy: Math.cos((Math.PI * angle) / 180) * speed,
@@ -351,22 +353,24 @@ function draw() {
 requestAnimationFrame(draw);
 
 function drawLine(
-  ctx,
-  startPoint,
-  endPoint,
+  ctx: CanvasRenderingContext2D,
+  startPoint: Point,
+  endPoint: Point,
   opts: { width?: number, color?: string } = { width: 2, color: "white" }
 ) {
   ctx.beginPath();
   ctx.moveTo(...startPoint);
   ctx.lineTo(...endPoint);
   ctx.closePath();
-  ctx.lineWidth = opts.width;
-  ctx.strokeStyle = opts.color;
+  ctx.lineWidth = opts.width || 1;
+  ctx.strokeStyle = opts.color || 'black';
   ctx.stroke();
   ctx.lineWidth = 1;
 }
 
-function drawCircle(ctx, centerPoint, radius) {
+type Point = [number, number];
+
+function drawCircle(ctx: CanvasRenderingContext2D, centerPoint: Point, radius: number) {
   ctx.beginPath();
   ctx.arc(centerPoint[0], centerPoint[1], radius, 0, 2 * Math.PI);
   ctx.fillStyle = "black";
