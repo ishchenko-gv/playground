@@ -2,7 +2,10 @@ import MathUtil from "./math-util";
 import CanvasUtil from "./canvas-util";
 
 class Ball {
-  constructor(paddlePosition: { x: number, y: number }, paddleSize: { width: number, height: number }) {
+  constructor(
+    paddlePosition: { x: number; y: number },
+    paddleSize: { width: number; height: number }
+  ) {
     this.x = paddlePosition.x;
     this.y = paddlePosition.y - this.radius - paddleSize.height;
   }
@@ -92,22 +95,25 @@ class Ball {
 
 namespace Ball {
   export enum Side {
-    TOP, RIGHT, LEFT, BOTTOM
+    TOP,
+    RIGHT,
+    LEFT,
+    BOTTOM,
   }
 
   export type Position = {
-    x: number,
-    y: number,
-    top: number,
-    right: number,
-    bottom: number,
-    left: number
-  }
+    x: number;
+    y: number;
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
 
   export type Delta = {
-    dx: number,
-    dy: number
-  }
+    dx: number;
+    dy: number;
+  };
 }
 
 export default Ball;

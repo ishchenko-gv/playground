@@ -1,4 +1,5 @@
 import Ball from "./ball";
+import CanvasUtil from "./canvas-util";
 
 export class Brick {
   constructor(x: number, y: number, color: string) {
@@ -31,7 +32,7 @@ export const level1Map = [
   ],
 ];
 
-type LevelMap = { offset?: number, color?: string}[][];
+type LevelMap = { offset?: number; color?: string }[][];
 
 export default class BrickField {
   constructor(map: LevelMap) {
@@ -45,7 +46,7 @@ export default class BrickField {
           new Brick(
             rowOpts.offset || 0 + startPointX + Brick.Size.width * i,
             startPointY + Brick.Size.height,
-            row[i].color || 'black'
+            row[i].color || "black"
           )
         );
       }
@@ -62,7 +63,11 @@ export default class BrickField {
     this.bricks = this.bricks.filter((item) => item !== brick);
   }
 
-  handleBallCollision(ballPosition: Ball.Position, ballDelta: Ball.Delta, onCollision: (side: Ball.Side) => void) {
+  handleBallCollision(
+    ballPosition: Ball.Position,
+    ballDelta: Ball.Delta,
+    onCollision: (side: Ball.Side) => void
+  ) {
     for (let brick of this.getBricks()) {
       if (
         ballPosition.right >= brick.x &&
@@ -91,13 +96,15 @@ export default class BrickField {
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(canvasUtil: CanvasUtil) {
     for (let brick of this.bricks) {
-      ctx.beginPath();
-      ctx.fillStyle = brick.color;
-      ctx.rect(brick.x, brick.y, Brick.Size.width, Brick.Size.height);
-      ctx.fill();
-      ctx.stroke();
+      canvasUtil.drawRectangle(
+        brick.x,
+        brick.y,
+        Brick.Size.width,
+        Brick.Size.height,
+        { color: brick.color }
+      );
     }
   }
 }

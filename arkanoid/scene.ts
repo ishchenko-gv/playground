@@ -1,14 +1,23 @@
 import Paddle from "./paddle";
 import Ball from "./ball";
 import BrickField from "./brick-field";
+import CanvasUtil from "./canvas-util";
 
 export default class Scene {
-  constructor(width: number, height: number, paddle: Paddle, ball: Ball, brickField: BrickField) {
+  constructor(
+    width: number,
+    height: number,
+    paddle: Paddle,
+    ball: Ball,
+    brickField: BrickField,
+    canvasUtil: CanvasUtil
+  ) {
     this.width = width;
     this.height = height;
     this.paddle = paddle;
     this.ball = ball;
     this.brickField = brickField;
+    this.canvasUtil = canvasUtil;
   }
 
   width: number;
@@ -16,15 +25,22 @@ export default class Scene {
   paddle: Paddle;
   ball: Ball;
   brickField: BrickField;
+  canvasUtil: CanvasUtil;
 
   isBallLost = false;
 
   update() {
-
     this.ball.updatePosition(this.paddle.getPosition().x);
 
-    this.paddle.handleBallCollision(this.ball.getPosition(), (side, angle) => this.ball.bounce(side, angle));
-    this.brickField.handleBallCollision(this.ball.getPosition(), this.ball.getDelta(), (side: Ball.Side) => this.ball.bounce(side));
+    this.paddle.handleBallCollision(this.ball.getPosition(), (side, angle) =>
+      this.ball.bounce(side, angle)
+    );
+
+    this.brickField.handleBallCollision(
+      this.ball.getPosition(),
+      this.ball.getDelta(),
+      (side: Ball.Side) => this.ball.bounce(side)
+    );
 
     this.handleCollisions();
   }
@@ -53,7 +69,7 @@ export default class Scene {
       this.ball.bounce(Ball.Side.LEFT);
     }
   }
- 
+
   handleIfBallLost() {
     const ballPosition = this.ball.getPosition();
     const paddlePosition = this.paddle.getPosition();
@@ -65,5 +81,11 @@ export default class Scene {
     ) {
       this.isBallLost = true;
     }
+  }
+
+  draw() {
+    this.paddle.draw(this.canvasUtil);
+    this.ball.draw(this.canvasUtil);
+    this.brickField.draw(this.canvasUtil);
   }
 }

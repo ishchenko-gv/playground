@@ -18,14 +18,14 @@ export default class CanvasUtil {
   drawLine(
     startPoint: Point,
     endPoint: Point,
-    opts: { width?: number, color?: string } = { width: 2, color: "white" }
+    opts: { width?: number; color?: string } = { width: 2, color: "white" }
   ) {
     this.ctx.beginPath();
     this.ctx.moveTo(...startPoint);
     this.ctx.lineTo(...endPoint);
     this.ctx.closePath();
     this.ctx.lineWidth = opts.width || 1;
-    this.ctx.strokeStyle = opts.color || 'black';
+    this.ctx.strokeStyle = opts.color || "black";
     this.ctx.stroke();
     this.ctx.lineWidth = 1;
   }
@@ -35,5 +35,19 @@ export default class CanvasUtil {
     this.ctx.arc(centerPoint[0], centerPoint[1], radius, 0, 2 * Math.PI);
     this.ctx.fillStyle = "black";
     this.ctx.fill();
+  }
+
+  drawRectangle(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    { color }: { color?: string }
+  ) {
+    this.ctx.beginPath();
+    this.ctx.fillStyle = color || "black";
+    this.ctx.rect(x, y, width, height);
+    this.ctx.fill();
+    this.ctx.stroke();
   }
 }

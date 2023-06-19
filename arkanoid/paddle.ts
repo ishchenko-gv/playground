@@ -39,7 +39,10 @@ export default class Paddle {
     };
   }
 
-  handleBallCollision(ballPosition: Ball.Position, onCollision: (side: Ball.Side, angle: number) => void) {
+  handleBallCollision(
+    ballPosition: Ball.Position,
+    onCollision: (side: Ball.Side, angle: number) => void
+  ) {
     const paddlePosition = this.getPosition();
 
     if (
@@ -50,8 +53,7 @@ export default class Paddle {
       const paddleCollisionPoint = ballPosition.x - paddlePosition.x;
 
       const bounceCorrection =
-        ((100 / (this.getSize().width / 2)) * paddleCollisionPoint) /
-        100;
+        ((100 / (this.getSize().width / 2)) * paddleCollisionPoint) / 100;
 
       const angle = 90 * Math.min(Math.abs(bounceCorrection), 0.8);
       const sign = bounceCorrection > 0 ? 1 : -1;
