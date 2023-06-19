@@ -92,6 +92,8 @@ export default class BrickField {
         }
 
         this.destroyBrick(brick);
+
+        break;
       }
     }
   }

@@ -18,13 +18,12 @@ canvas.addEventListener("mousemove", (e) => {
   paddle.moveTo(e.offsetX);
 });
 
-canvas.addEventListener("click", () => {
+canvas.addEventListener("click", async () => {
   ball.launch();
 });
 
 function draw() {
-  canvasUtil.clear();
-
+  scene.clear();
   scene.update();
   scene.draw();
 

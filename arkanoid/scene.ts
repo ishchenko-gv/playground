@@ -83,6 +83,10 @@ export default class Scene {
     }
   }
 
+  clear() {
+    this.canvasUtil.clear();
+  }
+
   draw() {
     this.paddle.draw(this.canvasUtil);
     this.ball.draw(this.canvasUtil);
