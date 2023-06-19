@@ -1,12 +1,16 @@
-const canvas = document.getElementById("arkanoid");
-const ctx = canvas.getContext("2d");
+const canvas = document.getElementById("arkanoid") as HTMLCanvasElement;
+const ctx = canvas.getContext("2d")!;
 
 class Scene {
-  constructor(paddle, ball, bricksMap) {
+  constructor(paddle: Paddle, ball: Ball, bricksMap: BricksMap) {
     this.paddle = paddle;
     this.ball = ball;
     this.bricksMap = bricksMap;
   }
+
+  paddle: Paddle;
+  ball: Ball;
+  bricksMap: BricksMap;
 
   isBallLost = false;
 
@@ -116,7 +120,7 @@ class Paddle {
   x = canvas.width / 2;
   y = canvas.height - 30;
 
-  moveTo(x) {
+  moveTo(x: number) {
     if (x - this.width / 2 >= 0 && x + this.width / 2 <= canvas.width) {
       this.x = x;
     }
@@ -138,7 +142,7 @@ class Paddle {
     };
   }
 
-  draw(ctx) {
+  draw(ctx: CanvasRenderingContext2D) {
     const startPoint = [this.getPosition().left, this.getPosition().y];
     const endPoint = [this.getPosition().right, this.getPosition().y];
 
@@ -152,13 +156,8 @@ class Ball {
     this.y = paddlePosition.y - this.radius - paddleSize.height;
   }
 
-  static Side = {
-    TOP: "top",
-    RIGHT: "right",
-    BOTTOM: "bottom",
-    LEFT: "left",
-  };
-
+  x: number;
+  y: number;
   isLaunched = false;
   radius = 6;
   minSpeed = 5;
@@ -208,7 +207,7 @@ class Ball {
     }
   }
 
-  bounce(side, angle) {
+  bounce(side: Ball.Side, angle?: number) {
     if ([Ball.Side.LEFT, Ball.Side.RIGHT].includes(side)) {
       this.dx = -this.dx;
     }
@@ -240,6 +239,12 @@ class Ball {
   }
 }
 
+namespace Ball {
+  export enum Side {
+    TOP, RIGHT, LEFT, BOTTOM
+  }
+}
+
 class Brick {
   constructor(x, y, color) {
     this.x = x;
@@ -251,6 +256,10 @@ class Brick {
     width: 50,
     height: 20,
   };
+
+  color: string;
+  x: number;
+  y: number;
 }
 
 const level1Map = [
@@ -269,8 +278,6 @@ const level1Map = [
 
 class BricksMap {
   constructor(map) {
-    this.bricks = [];
-
     for (let row of map) {
       let rowOpts = row.shift();
       const startPointX = 50;
@@ -287,6 +294,8 @@ class BricksMap {
       }
     }
   }
+
+  bricks: Brick[] = [];
 
   getBricks() {
     return this.bricks;
@@ -345,7 +354,7 @@ function drawLine(
   ctx,
   startPoint,
   endPoint,
-  opts = { width: 2, color: "white" }
+  opts: { width?: number, color?: string } = { width: 2, color: "white" }
 ) {
   ctx.beginPath();
   ctx.moveTo(...startPoint);

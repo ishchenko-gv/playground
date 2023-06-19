@@ -1,0 +1,1 @@
+// shut tsconfig input error
