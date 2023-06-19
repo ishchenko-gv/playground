@@ -1,22 +1,31 @@
 import Paddle from "./paddle";
 import Ball from "./ball";
+import BrickField from "./brick-field";
 
 export default class Scene {
-  constructor(width: number, height: number, paddle: Paddle, ball: Ball) {
+  constructor(width: number, height: number, paddle: Paddle, ball: Ball, brickField: BrickField) {
     this.width = width;
     this.height = height;
     this.paddle = paddle;
     this.ball = ball;
+    this.brickField = brickField;
   }
 
   width: number;
   height: number;
   paddle: Paddle;
   ball: Ball;
+  brickField: BrickField;
 
   isBallLost = false;
 
   update() {
+
+    this.ball.updatePosition(this.paddle.getPosition().x);
+
+    this.paddle.handleBallCollision(this.ball.getPosition(), (side, angle) => this.ball.bounce(side, angle));
+    this.brickField.handleBallCollision(this.ball.getPosition(), this.ball.getDelta(), (side: Ball.Side) => this.ball.bounce(side));
+
     this.handleCollisions();
   }
 

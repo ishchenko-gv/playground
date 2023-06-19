@@ -33,7 +33,7 @@ export const level1Map = [
 
 type LevelMap = { offset?: number, color?: string}[][];
 
-export default class BricksMap {
+export default class BrickField {
   constructor(map: LevelMap) {
     for (let row of map) {
       let rowOpts = row.shift() || { offset: 0 };
