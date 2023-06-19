@@ -57,7 +57,10 @@ class Scene {
         ((100 / (this.paddle.getSize().width / 2)) * paddleCollisionPoint) /
         100;
 
-      ball.bounce(Ball.Side.BOTTOM, bounceCorrection);
+      const angle = 90 * Math.min(Math.abs(bounceCorrection), 0.8);
+      const sign = bounceCorrection > 0 ? 1 : -1;
+
+      ball.bounce(Ball.Side.BOTTOM, angle * sign);
     }
   }
 
@@ -144,9 +147,9 @@ class Paddle {
 }
 
 class Ball {
-  constructor(paddlePosition) {
+  constructor(paddlePosition, paddleSize) {
     this.x = paddlePosition.x;
-    this.y = paddlePosition.y - this.radius;
+    this.y = paddlePosition.y - this.radius - paddleSize.height;
   }
 
   static Side = {
@@ -158,18 +161,13 @@ class Ball {
 
   isLaunched = false;
   radius = 6;
-  speed = 5;
-  dx = Math.sqrt(this.speed ** 2 / 2);
-  /**
-   * even if the ball has not been launched, it's already has a collision with the paddle,
-   * so this value should be changed to negative one, when tha game starts
-   */
-  dy = Math.sqrt(this.speed ** 2 / 2);
-
-  setPosition(x, y) {
-    this.x = x;
-    this.y = y;
-  }
+  minSpeed = 5;
+  speed = this.minSpeed;
+  maxSpeed = 9;
+  paddleBounceAcceleration = 0.3;
+  paddleBounceAngle = 10;
+  dx = MathUtil.getDeltaByAngle(this.paddleBounceAngle, this.speed).dx;
+  dy = -MathUtil.getDeltaByAngle(this.paddleBounceAngle, this.speed).dy;
 
   getPosition() {
     return {
@@ -182,6 +180,15 @@ class Ball {
     };
   }
 
+  updatePosition(paddleCenterX) {
+    if (this.isLaunched) {
+      this.x = this.x + this.dx;
+      this.y = this.y + this.dy;
+    } else {
+      this.x = paddleCenterX;
+    }
+  }
+
   getDelta() {
     return {
       dx: this.dx,
@@ -189,25 +196,35 @@ class Ball {
     };
   }
 
-  bounce(side, bounceCorrection) {
+  increaseSpeed() {
+    if (this.speed < this.maxSpeed) {
+      this.speed += 0.3;
+    }
+  }
+
+  decreaseSpeed() {
+    if (this.speed > this.minSpeed) {
+      this.speed -= 0.3;
+    }
+  }
+
+  bounce(side, angle) {
     if ([Ball.Side.LEFT, Ball.Side.RIGHT].includes(side)) {
       this.dx = -this.dx;
     }
 
     if ([Ball.Side.TOP, Ball.Side.BOTTOM].includes(side)) {
-      if (bounceCorrection) {
-        const angleDegrees =
-          90 * (1 - Math.min(Math.abs(bounceCorrection), 0.8));
+      if (angle) {
+        const { dx, dy } = MathUtil.getDeltaByAngle(angle, this.speed);
 
-        const angleRadians = (angleDegrees * Math.PI) / 180;
-        const dx = Math.cos(angleRadians) * this.speed;
-        const dy = Math.sin(angleRadians) * this.speed;
-        const sign = bounceCorrection > 0 ? 1 : -1;
+        this.dx = dx;
+        this.dy = -Math.abs(dy);
 
-        this.dx = dx * sign;
-        this.dy = -dy;
-
-        this.speed += 0.3;
+        if (Math.abs(angle) > 25) {
+          this.increaseSpeed();
+        } else {
+          this.decreaseSpeed();
+        }
       } else {
         this.dy = -this.dy;
       }
@@ -216,15 +233,6 @@ class Ball {
 
   launch() {
     this.isLaunched = true;
-  }
-
-  updatePosition(paddleCenterX) {
-    if (this.isLaunched) {
-      this.x = this.x + this.dx;
-      this.y = this.y + this.dy;
-    } else {
-      this.x = paddleCenterX;
-    }
   }
 
   draw(ctx) {
@@ -253,6 +261,9 @@ const level1Map = [
     { color: "red" },
     { color: "green" },
     { color: "red" },
+    { color: "green" },
+    { color: "red" },
+    { color: "green" },
   ],
 ];
 
@@ -296,8 +307,17 @@ class BricksMap {
   }
 }
 
+class MathUtil {
+  static getDeltaByAngle(angle, speed) {
+    return {
+      dx: Math.sin((Math.PI * angle) / 180) * speed,
+      dy: Math.cos((Math.PI * angle) / 180) * speed,
+    };
+  }
+}
+
 const paddle = new Paddle();
-const ball = new Ball(paddle.getPosition());
+const ball = new Ball(paddle.getPosition(), paddle.getSize());
 const bricksMap = new BricksMap(level1Map);
 const scene = new Scene(paddle, ball, bricksMap);
 
