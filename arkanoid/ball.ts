@@ -19,7 +19,7 @@ class Ball {
   dx = MathUtil.getDeltaByAngle(this.paddleBounceAngle, this.speed).dx;
   dy = -MathUtil.getDeltaByAngle(this.paddleBounceAngle, this.speed).dy;
 
-  getPosition() {
+  getPosition(): Ball.Position {
     return {
       x: this.x,
       y: this.y,
@@ -39,7 +39,7 @@ class Ball {
     }
   }
 
-  getDelta() {
+  getDelta(): Ball.Delta {
     return {
       dx: this.dx,
       dy: this.dy,
@@ -93,6 +93,20 @@ class Ball {
 namespace Ball {
   export enum Side {
     TOP, RIGHT, LEFT, BOTTOM
+  }
+
+  export type Position = {
+    x: number,
+    y: number,
+    top: number,
+    right: number,
+    bottom: number,
+    left: number
+  }
+
+  export type Delta = {
+    dx: number,
+    dy: number
   }
 }
 

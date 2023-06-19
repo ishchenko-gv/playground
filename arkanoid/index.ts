@@ -10,9 +10,9 @@ const { width, height } = canvas;
 
 const paddle = new Paddle(width, height);
 const ball = new Ball(paddle.getPosition(), paddle.getSize());
-const bricksMap = new BrickField(level1Map);
-const scene = new Scene(width, height, paddle, ball, bricksMap);
-const canvasUtil = new CanvasUtil(ctx);
+const brickField = new BrickField(level1Map);
+const scene = new Scene(width, height, paddle, ball);
+const canvasUtil = new CanvasUtil(ctx, width, height);
 
 canvas.addEventListener("mousemove", (e) => {
   paddle.moveTo(e.offsetX);
@@ -23,11 +23,18 @@ canvas.addEventListener("click", () => {
 });
 
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvasUtil.clear();
+
   scene.update();
+
+  ball.updatePosition(paddle.getPosition().x);
+
+  paddle.handleBallCollision(ball.getPosition(), (side, angle) => ball.bounce(side, angle));
+  brickField.handleBallCollision(ball.getPosition(), ball.getDelta(), (side) => ball.bounce(side));
+  
   paddle.draw(canvasUtil);
   ball.draw(canvasUtil);
-  bricksMap.draw(ctx);
+  brickField.draw(ctx);
 
   requestAnimationFrame(draw);
 }

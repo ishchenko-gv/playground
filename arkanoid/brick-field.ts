@@ -1,3 +1,5 @@
+import Ball from "./ball";
+
 export class Brick {
   constructor(x: number, y: number, color: string) {
     this.x = x;
@@ -56,8 +58,37 @@ export default class BricksMap {
     return this.bricks;
   }
 
-  removeBrick(brick: Brick) {
+  destroyBrick(brick: Brick) {
     this.bricks = this.bricks.filter((item) => item !== brick);
+  }
+
+  handleBallCollision(ballPosition: Ball.Position, ballDelta: Ball.Delta, onCollision: (side: Ball.Side) => void) {
+    for (let brick of this.getBricks()) {
+      if (
+        ballPosition.right >= brick.x &&
+        ballPosition.left <= brick.x + Brick.Size.width &&
+        ballPosition.bottom >= brick.y &&
+        ballPosition.top <= brick.y + Brick.Size.height
+      ) {
+        if (ballPosition.right - ballDelta.dx <= brick.x) {
+          onCollision(Ball.Side.RIGHT);
+        }
+
+        if (ballPosition.left - ballDelta.dx >= brick.x + Brick.Size.width) {
+          onCollision(Ball.Side.LEFT);
+        }
+
+        if (ballPosition.bottom - ballDelta.dy <= brick.y) {
+          onCollision(Ball.Side.BOTTOM);
+        }
+
+        if (ballPosition.top - ballDelta.dy >= brick.y + Brick.Size.height) {
+          onCollision(Ball.Side.TOP);
+        }
+
+        this.destroyBrick(brick);
+      }
+    }
   }
 
   draw(ctx: CanvasRenderingContext2D) {

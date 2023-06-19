@@ -1,11 +1,19 @@
 import { Point } from "./types";
 
 export default class CanvasUtil {
-  constructor(ctx: CanvasRenderingContext2D) {
+  constructor(ctx: CanvasRenderingContext2D, width: number, height: number) {
     this.ctx = ctx;
+    this.width = width;
+    this.height = height;
   }
 
   ctx: CanvasRenderingContext2D;
+  width: number;
+  height: number;
+
+  clear() {
+    this.ctx.clearRect(0, 0, this.width, this.height);
+  }
 
   drawLine(
     startPoint: Point,
