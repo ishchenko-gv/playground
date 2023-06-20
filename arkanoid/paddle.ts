@@ -3,23 +3,24 @@ import CanvasUtil from "./canvas-util";
 import { Point } from "./types";
 
 export default class Paddle {
-  constructor(sceneWidth: number, sceneHeight: number) {
+  constructor(sceneWidth: number) {
     this.sceneWidth = sceneWidth;
-    this.sceneHeight = sceneHeight;
-    this.x = this.sceneWidth / 2;
-    this.y = this.sceneHeight - 30;
   }
 
-  x: number;
-  y: number;
+  x = 0;
+  y = 0;
   width = 100;
   height = 6;
   sceneWidth: number;
-  sceneHeight: number;
+  heldBall: Ball | null = null;
 
-  moveTo(x: number) {
+  moveTo(x: number, y?: number) {
     if (x - this.width / 2 >= 0 && x + this.width / 2 <= this.sceneWidth) {
       this.x = x;
+    }
+
+    if (y) {
+      this.y = y;
     }
   }
 
@@ -45,6 +46,11 @@ export default class Paddle {
       width: this.width,
       height: this.height,
     };
+  }
+
+  holdBall(ball: Ball) {
+    ball.hold();
+    this.heldBall = ball;
   }
 
   handleBallCollision(ball: Ball) {

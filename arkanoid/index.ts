@@ -1,33 +1,80 @@
 import Scene from "./scene";
 import Ball from "./ball";
 import Paddle from "./paddle";
-import BrickField, { level1Map } from "./brick-field";
+import BrickField from "./brick-field";
 import CanvasUtil from "./canvas-util";
+import levels from "./levels";
+import { LevelMap } from "./types";
+import Player from "./player";
 
 const canvas = document.getElementById("arkanoid") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
 const { width, height } = canvas;
 
-const canvasUtil = new CanvasUtil(ctx, width, height);
-const paddle = new Paddle(width, height);
-const ball = new Ball(paddle.getPosition(), paddle.getSize());
-const brickField = new BrickField(level1Map);
-const scene = new Scene(width, height, paddle, ball, brickField, canvasUtil);
+class Game {
+  player = new Player();
+  level = 0;
+
+  scene = this.createScene(
+    levels[this.level] || levels[0],
+    this.handleBrickDestroy.bind(this),
+    this.handleLevelFinish
+  );
+
+  createScene(
+    level: LevelMap,
+    onBrickDestroy: (score: number) => void,
+    onFinish: () => void
+  ) {
+    const canvasUtil = new CanvasUtil(ctx, width, height);
+    const paddle = new Paddle(width);
+    const ball = new Ball();
+    const brickField = new BrickField(level);
+
+    return new Scene(
+      width,
+      height,
+      paddle,
+      ball,
+      brickField,
+      canvasUtil,
+      onBrickDestroy,
+      onFinish
+    );
+  }
+
+  handleBrickDestroy(score: number) {
+    this.player.addScore(score);
+  }
+
+  handleLevelFinish() {
+    this.level++;
+
+    this.scene = this.createScene(
+      levels[this.level] || levels[0],
+      this.handleBrickDestroy.bind(this),
+      this.handleLevelFinish
+    );
+  }
+}
+
+const game = new Game();
 
 canvas.addEventListener("mousemove", (e) => {
-  paddle.move(e.movementX);
+  game.scene.movePaddle(e.movementX);
 });
 
 canvas.addEventListener("click", () => {
   canvas.requestPointerLock();
-  ball.launch();
+
+  game.scene.launchBall();
 });
 
 function draw() {
-  scene.clear();
-  scene.update();
-  scene.draw();
-
+  game.scene.clear();
+  game.scene.update();
+  game.scene.draw();
+  console.log("draw");
   requestAnimationFrame(draw);
 }
 

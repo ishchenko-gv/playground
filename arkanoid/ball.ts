@@ -2,16 +2,8 @@ import MathUtil from "./math-util";
 import CanvasUtil from "./canvas-util";
 
 class Ball {
-  constructor(
-    paddlePosition: { x: number; y: number },
-    paddleSize: { width: number; height: number }
-  ) {
-    this.x = paddlePosition.x;
-    this.y = paddlePosition.y - this.radius - paddleSize.height;
-  }
-
-  x: number;
-  y: number;
+  x = 0;
+  y = 0;
   isLaunched = false;
   radius = 6;
   minSpeed = 5;
@@ -22,6 +14,11 @@ class Ball {
   dx = MathUtil.getDeltaByAngle(this.paddleBounceAngle, this.speed).dx;
   dy = -MathUtil.getDeltaByAngle(this.paddleBounceAngle, this.speed).dy;
 
+  setPosition(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+
   getPosition(): Ball.Position {
     return {
       x: this.x,
@@ -31,6 +28,10 @@ class Ball {
       bottom: this.y + this.radius,
       left: this.x - this.radius,
     };
+  }
+
+  getRadius() {
+    return this.radius;
   }
 
   updatePosition(paddleCenterX: number) {
@@ -86,6 +87,10 @@ class Ball {
 
   launch() {
     this.isLaunched = true;
+  }
+
+  hold() {
+    this.isLaunched = false;
   }
 
   draw(canvasUtil: CanvasUtil) {

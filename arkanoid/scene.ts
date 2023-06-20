@@ -10,7 +10,9 @@ export default class Scene {
     paddle: Paddle,
     ball: Ball,
     brickField: BrickField,
-    canvasUtil: CanvasUtil
+    canvasUtil: CanvasUtil,
+    onBrickDestroy: (score: number) => void,
+    onFinish: () => void
   ) {
     this.width = width;
     this.height = height;
@@ -18,6 +20,16 @@ export default class Scene {
     this.ball = ball;
     this.brickField = brickField;
     this.canvasUtil = canvasUtil;
+    this.handleBrickDestroy = onBrickDestroy;
+    this.handleLevelFinish = onFinish;
+
+    this.paddle.moveTo(this.width / 2, this.height - 30);
+    this.paddle.holdBall(this.ball);
+
+    this.ball.setPosition(
+      this.width / 2,
+      this.height - 30 - this.ball.getRadius() - this.paddle.getSize().height
+    );
   }
 
   width: number;
@@ -29,11 +41,19 @@ export default class Scene {
 
   isBallLost = false;
   score = 0;
+  currentLevel = 0;
+
+  handleBrickDestroy = (score: number) => {};
+  handleLevelFinish = () => {};
 
   update() {
+    if (this.brickField.isEmpty()) {
+      this.handleLevelFinish();
+    }
+
     this.ball.updatePosition(this.paddle.getPosition().x);
     this.paddle.handleBallCollision(this.ball);
-    this.brickField.handleBallCollision(this.ball, this.addScore.bind(this));
+    this.brickField.handleBallCollision(this.ball, this.handleBrickDestroy);
     this.handleCollisions();
   }
 
@@ -75,9 +95,16 @@ export default class Scene {
     }
   }
 
-  addScore(score: number) {
-    this.score += score;
-    console.log(this.score);
+  onLevelFinish(cb: () => void) {
+    this.handleLevelFinish = cb;
+  }
+
+  movePaddle(dx: number) {
+    this.paddle.move(dx);
+  }
+
+  launchBall() {
+    this.ball.launch();
   }
 
   clear() {

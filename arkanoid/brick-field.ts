@@ -1,5 +1,7 @@
 import Ball from "./ball";
 import CanvasUtil from "./canvas-util";
+import { level1Map } from "./levels";
+import { LevelMap } from "./types";
 
 export class Brick {
   constructor(x: number, y: number, color: string) {
@@ -17,49 +19,32 @@ export class Brick {
   x: number;
   y: number;
 }
-
-export const level1Map = [
-  [
-    { offset: 0 },
-    { color: "red" },
-    { color: "green" },
-    { color: "red" },
-    { color: "green" },
-    { color: "red" },
-    { color: "green" },
-    { color: "red" },
-    { color: "green" },
-  ],
-];
-
-type LevelMap = { offset?: number; color?: string }[][];
-
 export default class BrickField {
+  private bricks: Brick[] = [];
+
   constructor(map: LevelMap) {
-    for (let row of map) {
-      let rowOpts = row.shift() || { offset: 0 };
+    for (let i = 0; i < map.length; i++) {
+      let rowOpts = map[i][0] || { offset: 0 };
       const startPointX = 50;
       const startPointY = 50;
 
-      for (let i = 0; i < row.length; i++) {
+      for (let j = 1; j < map[i].length; j++) {
         this.bricks.push(
           new Brick(
-            rowOpts.offset || 0 + startPointX + Brick.Size.width * i,
-            startPointY + Brick.Size.height,
-            row[i].color || "black"
+            rowOpts.offset || 0 + startPointX + Brick.Size.width * (j - 1),
+            startPointY + Brick.Size.height * i,
+            map[i][j].color || "black"
           )
         );
       }
     }
   }
 
-  bricks: Brick[] = [];
-
-  getBricks() {
+  private getBricks() {
     return this.bricks;
   }
 
-  destroyBrick(brick: Brick) {
+  private destroyBrick(brick: Brick) {
     this.bricks = this.bricks.filter((item) => item !== brick);
   }
 
@@ -97,6 +82,10 @@ export default class BrickField {
         break;
       }
     }
+  }
+
+  isEmpty() {
+    return !this.bricks.length;
   }
 
   draw(canvasUtil: CanvasUtil) {
