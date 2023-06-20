@@ -31,4 +31,4 @@ function draw() {
   requestAnimationFrame(draw);
 }
 
-requestAnimationFrame(draw);
+draw();

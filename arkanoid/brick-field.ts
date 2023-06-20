@@ -63,11 +63,10 @@ export default class BrickField {
     this.bricks = this.bricks.filter((item) => item !== brick);
   }
 
-  handleBallCollision(
-    ballPosition: Ball.Position,
-    ballDelta: Ball.Delta,
-    onCollision: (side: Ball.Side) => void
-  ) {
+  handleBallCollision(ball: Ball, onDestroy: (score: number) => void) {
+    const ballPosition = ball.getPosition();
+    const ballDelta = ball.getDelta();
+
     for (let brick of this.getBricks()) {
       if (
         ballPosition.right >= brick.x &&
@@ -76,22 +75,24 @@ export default class BrickField {
         ballPosition.top <= brick.y + Brick.Size.height
       ) {
         if (ballPosition.right - ballDelta.dx <= brick.x) {
-          onCollision(Ball.Side.RIGHT);
+          ball.bounce(Ball.Side.RIGHT);
         }
 
         if (ballPosition.left - ballDelta.dx >= brick.x + Brick.Size.width) {
-          onCollision(Ball.Side.LEFT);
+          ball.bounce(Ball.Side.LEFT);
         }
 
         if (ballPosition.bottom - ballDelta.dy <= brick.y) {
-          onCollision(Ball.Side.BOTTOM);
+          ball.bounce(Ball.Side.BOTTOM);
         }
 
         if (ballPosition.top - ballDelta.dy >= brick.y + Brick.Size.height) {
-          onCollision(Ball.Side.TOP);
+          ball.bounce(Ball.Side.TOP);
         }
 
         this.destroyBrick(brick);
+
+        onDestroy(100);
 
         break;
       }

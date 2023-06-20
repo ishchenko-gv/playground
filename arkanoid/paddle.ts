@@ -47,11 +47,9 @@ export default class Paddle {
     };
   }
 
-  handleBallCollision(
-    ballPosition: Ball.Position,
-    onCollision: (side: Ball.Side, angle: number) => void
-  ) {
+  handleBallCollision(ball: Ball) {
     const paddlePosition = this.getPosition();
+    const ballPosition = ball.getPosition();
 
     if (
       ballPosition.bottom >= paddlePosition.y &&
@@ -66,7 +64,7 @@ export default class Paddle {
       const angle = 90 * Math.min(Math.abs(bounceCorrection), 0.8);
       const sign = bounceCorrection > 0 ? 1 : -1;
 
-      onCollision(Ball.Side.BOTTOM, angle * sign);
+      ball.bounce(Ball.Side.BOTTOM, angle * sign);
     }
   }
 

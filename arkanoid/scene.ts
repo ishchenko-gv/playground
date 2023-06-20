@@ -28,20 +28,12 @@ export default class Scene {
   canvasUtil: CanvasUtil;
 
   isBallLost = false;
+  score = 0;
 
   update() {
     this.ball.updatePosition(this.paddle.getPosition().x);
-
-    this.paddle.handleBallCollision(this.ball.getPosition(), (side, angle) =>
-      this.ball.bounce(side, angle)
-    );
-
-    this.brickField.handleBallCollision(
-      this.ball.getPosition(),
-      this.ball.getDelta(),
-      (side: Ball.Side) => this.ball.bounce(side)
-    );
-
+    this.paddle.handleBallCollision(this.ball);
+    this.brickField.handleBallCollision(this.ball, this.addScore.bind(this));
     this.handleCollisions();
   }
 
@@ -81,6 +73,11 @@ export default class Scene {
     ) {
       this.isBallLost = true;
     }
+  }
+
+  addScore(score: number) {
+    this.score += score;
+    console.log(this.score);
   }
 
   clear() {
