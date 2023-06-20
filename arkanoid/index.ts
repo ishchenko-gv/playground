@@ -15,10 +15,11 @@ const brickField = new BrickField(level1Map);
 const scene = new Scene(width, height, paddle, ball, brickField, canvasUtil);
 
 canvas.addEventListener("mousemove", (e) => {
-  paddle.moveTo(e.offsetX);
+  paddle.move(e.movementX);
 });
 
-canvas.addEventListener("click", async () => {
+canvas.addEventListener("click", () => {
+  canvas.requestPointerLock();
   ball.launch();
 });
 

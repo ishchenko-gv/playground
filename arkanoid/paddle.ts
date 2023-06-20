@@ -23,6 +23,14 @@ export default class Paddle {
     }
   }
 
+  move(dx: number) {
+    const x = this.x + dx;
+
+    if (x - this.width / 2 >= 0 && x + this.width / 2 <= this.sceneWidth) {
+      this.x = x;
+    }
+  }
+
   getPosition() {
     return {
       x: this.x,
