@@ -3,54 +3,75 @@ import Ball from "./ball";
 import Paddle from "./paddle";
 import BrickField from "./brick-field";
 import CanvasUtil from "./canvas-util";
-import levels from "./levels";
-import { LevelMap } from "./types";
+import levels, { LevelMap } from "./levels";
 import Player from "./player";
+import UI from "./ui";
 
-class UI extends HTMLElement {
+class ArkanoidElement extends HTMLElement {
   constructor() {
     super();
 
     const shadow = this.attachShadow({ mode: "open" });
-
+    this.ui = new UI(document, this.restartGame.bind(this));
     this.canvas = document.createElement("canvas");
+    this.canvas.style.border = "1px solid black";
+
     this.canvas.setAttribute("width", "500");
     this.canvas.setAttribute("height", "500");
 
+    shadow.appendChild(this.ui.getRootElement());
     shadow.appendChild(this.canvas);
 
-    const game = new Game(this.canvas);
+    this.game = new Game(this.canvas, this.ui);
 
     this.canvas.addEventListener("mousemove", (e) => {
-      game.scene.movePaddle(e.movementX);
+      this.game.scene.movePaddle(e.movementX);
     });
 
     this.canvas.addEventListener("click", () => {
       this.canvas.requestPointerLock();
 
-      game.scene.launchBall();
+      this.game.scene.launchBall();
     });
 
-    game.run();
+    this.game.run();
   }
 
+  restartGame() {
+    this.game.stop();
+    this.game = new Game(this.canvas, this.ui);
+    this.game.run();
+  }
+
+  ui: UI;
   canvas: HTMLCanvasElement;
+  game: Game;
 }
 
 class Game {
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, ui: UI) {
     this.canvas = canvas;
+    this.ui = ui;
+
+    this.ui.setScore(this.player.getScore());
+    this.ui.setLivesCount(this.player.getLives());
 
     this.scene = this.createScene(
-      levels[this.level] || levels[0],
+      levels[this.level],
       this.handleBrickDestroy.bind(this),
-      this.handleLevelFinish.bind(this)
+      this.handleLevelFinish.bind(this),
+      this.handleBallLoss.bind(this)
     );
   }
 
   canvas: HTMLCanvasElement;
+  ui: UI;
 
   run() {
+    if (this.isStopped) {
+      return;
+    }
+
     this.scene.clear();
     this.scene.update();
     this.scene.draw();
@@ -60,13 +81,19 @@ class Game {
 
   player = new Player();
   level = 0;
+  isStopped = false;
 
   scene: Scene;
+
+  stop() {
+    this.isStopped = true;
+  }
 
   createScene(
     level: LevelMap,
     onBrickDestroy: (score: number) => void,
-    onFinish: () => void
+    onFinish: () => void,
+    onBallLoss: () => void
   ) {
     const ctx = this.canvas.getContext("2d")!;
     const { width, height } = this.canvas;
@@ -83,23 +110,37 @@ class Game {
       brickField,
       canvasUtil,
       onBrickDestroy,
-      onFinish
+      onFinish,
+      onBallLoss
     );
   }
 
   handleBrickDestroy(score: number) {
     this.player.addScore(score);
+    this.ui.setScore(this.player.getScore());
   }
 
   handleLevelFinish() {
+    if (this.level === levels.length - 1) {
+      return this.ui.showRestartBtn();
+    }
+
     this.level++;
 
     this.scene = this.createScene(
-      levels[this.level] || levels[0],
+      levels[this.level],
       this.handleBrickDestroy.bind(this),
-      this.handleLevelFinish.bind(this)
+      this.handleLevelFinish.bind(this),
+      this.handleBallLoss.bind(this)
     );
+  }
+
+  handleBallLoss() {
+    this.player.decreaseLives();
+    this.ui.setLivesCount(this.player.getLives());
+
+    if (!this.player.getLives()) this.stop();
   }
 }
 
-customElements.define("arkanoid-game", UI);
+customElements.define("arkanoid-game", ArkanoidElement);

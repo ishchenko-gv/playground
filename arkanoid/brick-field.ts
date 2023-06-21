@@ -1,8 +1,6 @@
 import Ball from "./ball";
 import CanvasUtil from "./canvas-util";
-import { level1Map } from "./levels";
-import { LevelMap } from "./types";
-
+import { LevelMap } from "./levels";
 export class Brick {
   constructor(x: number, y: number, color: string) {
     this.x = x;

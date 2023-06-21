@@ -12,7 +12,8 @@ export default class Scene {
     brickField: BrickField,
     canvasUtil: CanvasUtil,
     onBrickDestroy: (score: number) => void,
-    onFinish: () => void
+    onFinish: () => void,
+    onBallLoss: () => void
   ) {
     this.width = width;
     this.height = height;
@@ -22,14 +23,11 @@ export default class Scene {
     this.canvasUtil = canvasUtil;
     this.handleBrickDestroy = onBrickDestroy;
     this.handleLevelFinish = onFinish;
+    this.handleBallLoss = onBallLoss;
 
     this.paddle.moveTo(this.width / 2, this.height - 30);
-    this.paddle.holdBall(this.ball);
 
-    this.ball.setPosition(
-      this.width / 2,
-      this.height - 30 - this.ball.getRadius() - this.paddle.getSize().height
-    );
+    this.putBallOnPaddle();
   }
 
   width: number;
@@ -39,12 +37,13 @@ export default class Scene {
   brickField: BrickField;
   canvasUtil: CanvasUtil;
 
-  isBallLost = false;
   score = 0;
   currentLevel = 0;
+  isStopped = false;
 
   handleBrickDestroy = (score: number) => {};
   handleLevelFinish = () => {};
+  handleBallLoss = () => {};
 
   update() {
     if (this.brickField.isEmpty()) {
@@ -57,11 +56,9 @@ export default class Scene {
     this.handleCollisions();
   }
 
-  handleCollisions() {
-    if (this.isBallLost) {
-      return;
-    }
+  stop() {}
 
+  handleCollisions() {
     this.handleIfBallLost();
     this.handleBallWallCollision();
   }
@@ -91,8 +88,18 @@ export default class Scene {
         ballPosition.left > paddlePosition.right) &&
       ballPosition.bottom > paddlePosition.y
     ) {
-      this.isBallLost = true;
+      this.handleBallLoss();
+      this.putBallOnPaddle();
     }
+  }
+
+  putBallOnPaddle() {
+    this.ball.setPosition(
+      this.width / 2,
+      this.height - 30 - this.ball.getRadius() - this.paddle.getSize().height
+    );
+
+    this.paddle.holdBall(this.ball);
   }
 
   onLevelFinish(cb: () => void) {
