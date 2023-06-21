@@ -53,6 +53,11 @@ export default class Paddle {
     this.heldBall = ball;
   }
 
+  launchBall() {
+    this.heldBall?.launch();
+    this.heldBall = null;
+  }
+
   handleBallCollision(ball: Ball) {
     const paddlePosition = this.getPosition();
     const ballPosition = ball.getPosition();

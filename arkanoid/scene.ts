@@ -104,7 +104,7 @@ export default class Scene {
   }
 
   launchBall() {
-    this.ball.launch();
+    this.paddle.launchBall();
   }
 
   clear() {

@@ -18,7 +18,7 @@ class Game {
   scene = this.createScene(
     levels[this.level] || levels[0],
     this.handleBrickDestroy.bind(this),
-    this.handleLevelFinish
+    this.handleLevelFinish.bind(this)
   );
 
   createScene(
@@ -53,7 +53,7 @@ class Game {
     this.scene = this.createScene(
       levels[this.level] || levels[0],
       this.handleBrickDestroy.bind(this),
-      this.handleLevelFinish
+      this.handleLevelFinish.bind(this)
     );
   }
 }
@@ -74,7 +74,7 @@ function draw() {
   game.scene.clear();
   game.scene.update();
   game.scene.draw();
-  console.log("draw");
+
   requestAnimationFrame(draw);
 }
 
