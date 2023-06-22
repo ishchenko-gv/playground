@@ -6,22 +6,22 @@ export default class UI {
     onGameRestart: () => void
   ) {
     this.document = document;
-    this.rootElement = this.buildRootElement();
-    this.rootElement.style.position = "relative";
 
-    this.canvas = this.buildCanvasElement();
+    this.canvas = this.createCanvasElement();
     this.canvas.addEventListener("click", onCanvasClick);
     this.canvas.addEventListener("mousemove", onCanvasMouseMove);
 
     this.scoreWrap = document.createElement("div");
     this.livesCountWrap = document.createElement("div");
 
-    this.retryModal = this.buildRetryModal(onGameRestart);
+    this.retryModal = this.createRetryModal(onGameRestart);
 
-    this.rootElement.appendChild(this.scoreWrap);
-    this.rootElement.appendChild(this.livesCountWrap);
-    this.rootElement.appendChild(this.canvas);
-    this.rootElement.appendChild(this.retryModal);
+    this.rootElement = this.createRootElement([
+      this.scoreWrap,
+      this.livesCountWrap,
+      this.canvas,
+      this.retryModal,
+    ]);
   }
 
   private readonly document: Document;
@@ -31,101 +31,135 @@ export default class UI {
   private readonly livesCountWrap: HTMLDivElement;
   private readonly retryModal: HTMLDivElement;
 
-  buildRootElement() {
-    const rootElement = document.createElement("div");
-    rootElement.style.width = "100vw";
-    rootElement.style.height = "100vh";
-
-    return rootElement;
-  }
-
-  buildCanvasElement() {
-    const canvas = document.createElement("canvas");
-    canvas.style.display = "block";
-    canvas.style.border = "1px solid black";
-    canvas.style.backgroundColor = "#b4b4b4";
-
-    canvas.setAttribute("width", "500");
-    canvas.setAttribute("height", "500");
-
-    return canvas;
-  }
-
-  buildModal(contentElement: HTMLDivElement) {
-    const modal = this.document.createElement("div");
-
-    const style = {
-      display: "none",
-      position: "absolute",
-      top: "0",
-      left: "0",
-      width: "100%",
-      height: "100%",
-    };
-
-    modal.appendChild(contentElement);
-
-    return this.addStyle<HTMLDivElement>(modal, style);
-  }
-
-  buildRetryModal(onRetry: () => void) {
-    const wrapStyle = {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: "100%",
-      height: "100%",
-    };
-
-    const wrap = this.addStyle<HTMLDivElement>(
-      this.document.createElement("div"),
-      wrapStyle
-    );
-
-    const retryBtn = this.buildButton({
-      onClick: () => {
-        this.hideRetryModal();
-        this.requestPointerLock();
-        onRetry();
-      },
-      text: "retry",
-    });
-
-    wrap.appendChild(retryBtn);
-
-    return this.buildModal(wrap);
-  }
-
-  buildButton(
+  createElement<T extends HTMLElement>(
+    tag: string,
     {
+      children,
+      styles,
+      attributes,
       onClick,
-      text,
-      style,
-    }: { onClick: () => void; text: string; style?: Record<string, string> } = {
-      onClick: () => {},
-      text: "",
-      style: { backgroundColor: "gray", color: "black" },
+    }: {
+      children?: (HTMLElement | string)[];
+      styles?: Record<string, string>;
+      attributes?: Record<string, string>;
+      onClick?: () => void;
     }
   ) {
-    const resStyle = {
-      margin: "0",
-      padding: "12px",
-      fontSize: "18px",
-      appearance: "none",
-      cursor: "pointer",
-      ...style,
-    };
+    const element = this.document.createElement(tag) as T;
 
-    const button = this.addStyle(
-      this.document.createElement("button"),
-      resStyle
-    );
+    if (children) {
+      children.forEach((child) => {
+        if (typeof child === "string") {
+          return element.appendChild(this.document.createTextNode(child));
+        }
 
-    button.setAttribute("role", "button");
-    button.addEventListener("click", onClick);
-    button.innerHTML = text;
+        element.appendChild(child);
+      });
+    }
 
-    return button;
+    if (styles) this.addStyles(element, styles);
+    if (attributes) this.addAttributes(element, attributes);
+    if (onClick) element.addEventListener("click", onClick);
+
+    return element;
+  }
+
+  createRootElement(children: HTMLElement[]) {
+    return this.createElement<HTMLDivElement>("div", {
+      children,
+      styles: {
+        position: "relative",
+        width: "100vw",
+        height: "100vh",
+      },
+    });
+  }
+
+  createCanvasElement() {
+    return this.createElement<HTMLCanvasElement>("canvas", {
+      styles: {
+        display: "block",
+        margin: "32px auto",
+        border: "1px solid gray",
+        backgroundColor: "#b4b4b4",
+      },
+      attributes: {
+        width: "500",
+        height: "500",
+      },
+    });
+  }
+
+  createModal<T extends HTMLElement>(contentElement: T) {
+    return this.createElement<HTMLDivElement>("div", {
+      children: [contentElement],
+      styles: {
+        display: "none",
+        position: "absolute",
+        top: "0",
+        left: "0",
+        width: "100%",
+        height: "100%",
+      },
+    });
+  }
+
+  createRetryModal(onRetry: () => void) {
+    const wrap = this.createElement("div", {
+      children: [
+        this.createButton({
+          onClick: () => {
+            this.hideRetryModal();
+            this.requestPointerLock();
+            onRetry();
+          },
+          text: "retry",
+        }),
+      ],
+      styles: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        height: "100%",
+      },
+    });
+
+    return this.createModal(wrap);
+  }
+
+  createButton(
+    {
+      text,
+      styles,
+      onClick,
+    }: {
+      text: string;
+      styles?: Record<string, string>;
+      onClick: () => void;
+    } = {
+      text: "",
+      styles: { backgroundColor: "gray", color: "black" },
+      onClick: () => {},
+    }
+  ) {
+    return this.createElement("button", {
+      children: [text],
+      styles: {
+        margin: "0",
+        padding: "12px 32px",
+        fontSize: "18px",
+        appearance: "none",
+        cursor: "pointer",
+        border: "none",
+        borderRadius: "8px",
+        ...styles,
+      },
+      attributes: {
+        role: "button",
+      },
+      onClick,
+    });
   }
 
   showRetryModal() {
@@ -137,9 +171,20 @@ export default class UI {
     this.retryModal.style.display = "none";
   }
 
-  addStyle<T extends HTMLElement>(element: T, style: Record<string, string>) {
-    Object.entries(style).forEach(([k, v]) => {
-      (<any>element.style)[k] = v;
+  addStyles<T extends HTMLElement>(element: T, styles: Record<string, string>) {
+    Object.entries(styles).forEach(([k, v]) => {
+      (<Record<string, string>>(<unknown>element.style))[k] = v;
+    });
+
+    return element;
+  }
+
+  addAttributes<T extends HTMLElement>(
+    element: T,
+    attributes: Record<string, string>
+  ) {
+    Object.entries(attributes).forEach(([k, v]) => {
+      element.setAttribute(k, v);
     });
 
     return element;

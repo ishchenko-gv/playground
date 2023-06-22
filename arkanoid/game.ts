@@ -36,8 +36,6 @@ export default class Game {
       this.scene.clear();
       this.scene.update();
       this.scene.draw();
-
-      this.lastRenderTime = Date.now();
     }
 
     raf(this.render.bind(this, raf));
@@ -87,7 +85,6 @@ export default class Game {
       if (!this.player.getLives()) {
         this.stop();
         this.ui.showRetryModal();
-        this.ui.exitPointerLock();
       }
     };
 
