@@ -27,11 +27,9 @@ class ArkanoidElement extends HTMLElement {
       handleGameRestart
     );
 
+    this.attachShadow({ mode: "open" }).appendChild(this.ui.getRootElement());
+
     this.game = new Game(this.ui);
-
-    const shadow = this.attachShadow({ mode: "open" });
-    shadow.appendChild(this.ui.getRootElement());
-
     this.game.render(requestAnimationFrame);
   }
 

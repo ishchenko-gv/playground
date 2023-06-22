@@ -10,16 +10,10 @@ import UI from "./ui";
 export default class Game {
   constructor(ui: UI) {
     this.ui = ui;
-
     this.ui.setScore(this.player.getScore());
     this.ui.setLivesCount(this.player.getLives());
 
-    this.scene = this.createScene(
-      levels[this.level],
-      this.handleBrickDestroy.bind(this),
-      this.handleLevelFinish.bind(this),
-      this.handleBallLoss.bind(this)
-    );
+    this.scene = this.createScene(levels[this.level]);
   }
 
   private readonly ui: UI;
@@ -62,18 +56,40 @@ export default class Game {
     this.isStopped = true;
   }
 
-  createScene(
-    level: LevelMap,
-    onBrickDestroy: (score: number) => void,
-    onFinish: () => void,
-    onBallLoss: () => void
-  ) {
+  createScene(level: LevelMap) {
     const ctx = this.ui.getCanvasCtx();
     const { width, height } = this.ui.getCanvasSize();
     const canvasUtil = new CanvasUtil(ctx, width, height);
     const paddle = new Paddle(width);
     const ball = new Ball();
     const brickField = new BrickField(level);
+
+    const handleBrickDestroy = (score: number) => {
+      this.player.addScore(score);
+      this.ui.setScore(this.player.getScore());
+    };
+
+    const handleLevelFinish = () => {
+      if (this.level === levels.length - 1) {
+        this.stop();
+        return this.ui.showRetryModal();
+      }
+
+      this.level++;
+
+      this.scene = this.createScene(levels[this.level]);
+    };
+
+    const handleBallLoss = () => {
+      this.player.decreaseLives();
+      this.ui.setLivesCount(this.player.getLives());
+
+      if (!this.player.getLives()) {
+        this.stop();
+        this.ui.showRetryModal();
+        this.ui.exitPointerLock();
+      }
+    };
 
     return new Scene(
       width,
@@ -82,40 +98,9 @@ export default class Game {
       ball,
       brickField,
       canvasUtil,
-      onBrickDestroy,
-      onFinish,
-      onBallLoss
+      handleBrickDestroy,
+      handleLevelFinish,
+      handleBallLoss
     );
-  }
-
-  handleBrickDestroy(score: number) {
-    this.player.addScore(score);
-    this.ui.setScore(this.player.getScore());
-  }
-
-  handleLevelFinish() {
-    if (this.level === levels.length - 1) {
-      return this.ui.showRestartBtn();
-    }
-
-    this.level++;
-
-    this.scene = this.createScene(
-      levels[this.level],
-      this.handleBrickDestroy.bind(this),
-      this.handleLevelFinish.bind(this),
-      this.handleBallLoss.bind(this)
-    );
-  }
-
-  handleBallLoss() {
-    this.player.decreaseLives();
-    this.ui.setLivesCount(this.player.getLives());
-
-    if (!this.player.getLives()) {
-      this.stop();
-      this.ui.showRestartBtn();
-      this.ui.exitPointerLock();
-    }
   }
 }
