@@ -30,19 +30,15 @@ export default class Scene {
     this.putBallOnPaddle();
   }
 
-  width: number;
-  height: number;
-  paddle: Paddle;
-  ball: Ball;
-  brickField: BrickField;
-  canvasUtil: CanvasUtil;
-
-  score = 0;
-  currentLevel = 0;
-
-  handleBrickDestroy = (score: number) => {};
-  handleLevelFinish = () => {};
-  handleBallLoss = () => {};
+  private readonly width: number;
+  private readonly height: number;
+  private readonly paddle: Paddle;
+  private readonly ball: Ball;
+  private readonly brickField: BrickField;
+  private readonly canvasUtil: CanvasUtil;
+  private readonly handleBrickDestroy = (score: number) => {};
+  private readonly handleLevelFinish = () => {};
+  private readonly handleBallLoss = () => {};
 
   update() {
     if (this.brickField.isEmpty()) {
@@ -52,7 +48,6 @@ export default class Scene {
     this.ball.updatePosition(this.paddle.getPosition().x);
     this.paddle.handleBallCollision(this.ball);
     this.brickField.handleBallCollision(this.ball, this.handleBrickDestroy);
-    this.handleIfBallLost();
     this.handleBallWallCollision();
   }
 
@@ -70,17 +65,8 @@ export default class Scene {
     if (ballPosition.left <= 0) {
       this.ball.bounce(Ball.Side.LEFT);
     }
-  }
 
-  handleIfBallLost() {
-    const ballPosition = this.ball.getPosition();
-    const paddlePosition = this.paddle.getPosition();
-
-    if (
-      (ballPosition.right < paddlePosition.left ||
-        ballPosition.left > paddlePosition.right) &&
-      ballPosition.bottom > paddlePosition.y
-    ) {
+    if (ballPosition.top > this.height) {
       this.handleBallLoss();
       this.putBallOnPaddle();
     }
@@ -93,10 +79,6 @@ export default class Scene {
     );
 
     this.paddle.holdBall(this.ball);
-  }
-
-  onLevelFinish(cb: () => void) {
-    this.handleLevelFinish = cb;
   }
 
   movePaddle(dx: number) {

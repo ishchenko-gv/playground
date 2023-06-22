@@ -1,6 +1,7 @@
 import Ball from "./ball";
 import CanvasUtil from "./canvas-util";
 import { LevelMap } from "./levels";
+
 export class Brick {
   constructor(x: number, y: number, color: string) {
     this.x = x;
@@ -13,10 +14,11 @@ export class Brick {
     height: 20,
   };
 
-  color: string;
-  x: number;
-  y: number;
+  readonly color: string;
+  readonly x: number;
+  readonly y: number;
 }
+
 export default class BrickField {
   private bricks: Brick[] = [];
 

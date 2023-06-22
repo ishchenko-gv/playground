@@ -8,8 +8,7 @@ import Player from "./player";
 import UI from "./ui";
 
 export default class Game {
-  constructor(canvas: HTMLCanvasElement, ui: UI) {
-    this.canvas = canvas;
+  constructor(ui: UI) {
     this.ui = ui;
 
     this.ui.setScore(this.player.getScore());
@@ -23,24 +22,40 @@ export default class Game {
     );
   }
 
-  canvas: HTMLCanvasElement;
-  ui: UI;
+  private readonly ui: UI;
+
+  private readonly FPS = 60;
+  private lastRenderTime = Date.now();
+
   scene: Scene;
 
-  player = new Player();
-  level = 0;
-  isStopped = false;
+  private player = new Player();
+  private level = 0;
+  private isStopped = false;
 
-  run(raf: (f: () => void) => number) {
+  render(raf: (f: () => void) => number) {
     if (this.isStopped) {
       return;
     }
 
-    this.scene.clear();
-    this.scene.update();
-    this.scene.draw();
+    if (this.shouldRender()) {
+      this.scene.clear();
+      this.scene.update();
+      this.scene.draw();
 
-    raf(this.run.bind(this, raf));
+      this.lastRenderTime = Date.now();
+    }
+
+    raf(this.render.bind(this, raf));
+  }
+
+  shouldRender() {
+    if (Date.now() - this.lastRenderTime > 1000 / this.FPS) {
+      this.lastRenderTime = Date.now();
+      return true;
+    }
+
+    return false;
   }
 
   stop() {
@@ -53,8 +68,8 @@ export default class Game {
     onFinish: () => void,
     onBallLoss: () => void
   ) {
-    const ctx = this.canvas.getContext("2d")!;
-    const { width, height } = this.canvas;
+    const ctx = this.ui.getCanvasCtx();
+    const { width, height } = this.ui.getCanvasSize();
     const canvasUtil = new CanvasUtil(ctx, width, height);
     const paddle = new Paddle(width);
     const ball = new Ball();
@@ -100,7 +115,7 @@ export default class Game {
     if (!this.player.getLives()) {
       this.stop();
       this.ui.showRestartBtn();
-      document.exitPointerLock();
+      this.ui.exitPointerLock();
     }
   }
 }

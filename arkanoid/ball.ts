@@ -2,16 +2,16 @@ import MathUtil from "./math-util";
 import CanvasUtil from "./canvas-util";
 
 class Ball {
-  x = 0;
-  y = 0;
-  isLaunched = false;
-  radius = 6;
-  minSpeed = 5;
-  speed = this.minSpeed;
-  maxSpeed = 9;
-  paddleBounceAcceleration = 0.3;
-  dx = MathUtil.getDeltaByAngle(10, this.speed).dx;
-  dy = -MathUtil.getDeltaByAngle(10, this.speed).dy;
+  private x = 0;
+  private y = 0;
+  private isLaunched = false;
+  private radius = 6;
+  private readonly minSpeed = 12;
+  private readonly maxSpeed = 20;
+  private speed = this.minSpeed;
+  private readonly paddleBounceAcceleration = 0.3;
+  private dx = MathUtil.getDeltaByAngle(10, this.speed).dx;
+  private dy = -MathUtil.getDeltaByAngle(10, this.speed).dy;
 
   setPosition(x: number, y: number) {
     this.x = x;
@@ -40,7 +40,6 @@ class Ball {
     } else {
       this.x = paddleCenterX;
     }
-    console.log(this.isLaunched, this.x, this.y, this.dx, this.dy);
   }
 
   getDelta(): Ball.Delta {

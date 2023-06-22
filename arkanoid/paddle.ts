@@ -7,12 +7,12 @@ export default class Paddle {
     this.sceneWidth = sceneWidth;
   }
 
-  x = 0;
-  y = 0;
-  width = 100;
-  height = 6;
-  sceneWidth: number;
-  heldBall: Ball | null = null;
+  private x = 0;
+  private y = 0;
+  private width = 100;
+  private height = 6;
+  private readonly sceneWidth: number;
+  private heldBall: Ball | null = null;
 
   moveTo(x: number, y?: number) {
     if (x - this.width / 2 >= 0 && x + this.width / 2 <= this.sceneWidth) {
@@ -60,12 +60,15 @@ export default class Paddle {
 
   handleBallCollision(ball: Ball) {
     const paddlePosition = this.getPosition();
+    const paddleSize = this.getSize();
     const ballPosition = ball.getPosition();
+    const ballDelta = ball.getDelta();
 
     if (
-      ballPosition.bottom >= paddlePosition.y &&
+      ballPosition.bottom >= paddlePosition.y - paddleSize.height &&
       ballPosition.right >= paddlePosition.left &&
-      ballPosition.left <= paddlePosition.right
+      ballPosition.left <= paddlePosition.right &&
+      ballPosition.bottom - ballDelta.dy < paddlePosition.y - paddleSize.height
     ) {
       const paddleCollisionPoint = ballPosition.x - paddlePosition.x;
 
