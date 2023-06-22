@@ -39,7 +39,6 @@ export default class Scene {
 
   score = 0;
   currentLevel = 0;
-  isStopped = false;
 
   handleBrickDestroy = (score: number) => {};
   handleLevelFinish = () => {};
@@ -53,12 +52,6 @@ export default class Scene {
     this.ball.updatePosition(this.paddle.getPosition().x);
     this.paddle.handleBallCollision(this.ball);
     this.brickField.handleBallCollision(this.ball, this.handleBrickDestroy);
-    this.handleCollisions();
-  }
-
-  stop() {}
-
-  handleCollisions() {
     this.handleIfBallLost();
     this.handleBallWallCollision();
   }
@@ -95,7 +88,7 @@ export default class Scene {
 
   putBallOnPaddle() {
     this.ball.setPosition(
-      this.width / 2,
+      this.paddle.getPosition().x,
       this.height - 30 - this.ball.getRadius() - this.paddle.getSize().height
     );
 

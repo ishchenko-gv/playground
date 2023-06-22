@@ -10,9 +10,8 @@ class Ball {
   speed = this.minSpeed;
   maxSpeed = 9;
   paddleBounceAcceleration = 0.3;
-  paddleBounceAngle = 10;
-  dx = MathUtil.getDeltaByAngle(this.paddleBounceAngle, this.speed).dx;
-  dy = -MathUtil.getDeltaByAngle(this.paddleBounceAngle, this.speed).dy;
+  dx = MathUtil.getDeltaByAngle(10, this.speed).dx;
+  dy = -MathUtil.getDeltaByAngle(10, this.speed).dy;
 
   setPosition(x: number, y: number) {
     this.x = x;
@@ -41,6 +40,7 @@ class Ball {
     } else {
       this.x = paddleCenterX;
     }
+    console.log(this.isLaunched, this.x, this.y, this.dx, this.dy);
   }
 
   getDelta(): Ball.Delta {
@@ -52,13 +52,13 @@ class Ball {
 
   increaseSpeed() {
     if (this.speed < this.maxSpeed) {
-      this.speed += 0.3;
+      this.speed += this.paddleBounceAcceleration;
     }
   }
 
   decreaseSpeed() {
     if (this.speed > this.minSpeed) {
-      this.speed -= 0.3;
+      this.speed -= this.paddleBounceAcceleration;
     }
   }
 
